@@ -68,23 +68,25 @@ const Agent = ({ userName, userId, type }: AgentProps) => {
   }, [messages, callStatus, type, userId]);
 
   const handleCall = async () => {
-    console.log("Workflow ID:", process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID);
+    console.log("VAPI Call Start — DEBUG:", {
+      workflowId: process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID,
+      assistantId: process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID,
+      username: userName,
+      userid: userId,
+    });
 
     setCallStatus(CallStatus.CONNECTING);
 
-    await vapi.start({
-      assistant: {
-        id: process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID!,
-      },
-      voice: {
-        provider: "11labs", // or "playht", depending on what you're using
-        voiceId: "Bella", // or another supported voice
-      },
-      variables: {
-        username: userName,
-        userid: userId,
-      },
-    });
+    try {
+      await vapi.start(process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!, {
+        variableValues: {
+          username: userName,
+          userid: userId,
+        },
+      });
+    } catch (error) {
+      console.error("VAPI Call Failed:", error);
+    }
   };
 
   const handleDisconnect = async () => {
